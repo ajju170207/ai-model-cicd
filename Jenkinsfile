@@ -7,9 +7,13 @@ pipeline {
     }
 
     environment {
-    PATH = "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
-    IMAGE_NAME = "ai-model:latest"
-        }
+        HOME = "/Users/ajay"
+        DOCKER_CONFIG = "/Users/ajay/.docker"
+
+        PATH = "/Users/ajay/.docker/bin:/Applications/Docker.app/Contents/Resources/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+
+        IMAGE_NAME = "ai-model:latest"
+    }
 
     triggers {
         pollSCM('H/2 * * * *')
@@ -20,6 +24,20 @@ pipeline {
         stage('Checkout') {
             steps {
                 checkout scm
+            }
+        }
+
+        stage('Verify Docker') {
+            steps {
+                sh '''
+                    echo "Checking Docker access from Jenkins..."
+                    whoami
+                    echo "PATH=$PATH"
+                    which docker
+                    docker --version
+                    docker context show
+                    docker info --format '{{.ServerVersion}}'
+                '''
             }
         }
 
@@ -74,7 +92,9 @@ pipeline {
 
         stage('Load Image into Minikube') {
             steps {
-                sh 'minikube image load $IMAGE_NAME'
+                sh '''
+                    minikube image load $IMAGE_NAME
+                '''
             }
         }
 
@@ -89,16 +109,6 @@ pipeline {
                 '''
             }
         }
-
-        stage('Verify Docker') {
-    steps {
-        sh 'whoami'
-        sh 'echo $PATH'
-        sh 'which docker'
-        sh 'docker --version'
-        sh "docker info --format '{{.ServerVersion}}'"
-    }
-}
     }
 
     post {
