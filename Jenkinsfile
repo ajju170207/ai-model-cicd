@@ -7,9 +7,9 @@ pipeline {
     }
 
     environment {
-        PATH = "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
-        IMAGE_NAME = "ai-model:latest"
-    }
+    PATH = "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+    IMAGE_NAME = "ai-model:latest"
+        }
 
     triggers {
         pollSCM('H/2 * * * *')
@@ -90,15 +90,15 @@ pipeline {
             }
         }
 
-        stage('Verify Deployment') {
-            steps {
-                sh '''
-                    kubectl get pods
-                    kubectl get deployments
-                    kubectl get services
-                '''
-            }
-        }
+        stage('Verify Docker') {
+    steps {
+        sh 'whoami'
+        sh 'echo $PATH'
+        sh 'which docker'
+        sh 'docker --version'
+        sh "docker info --format '{{.ServerVersion}}'"
+    }
+}
     }
 
     post {
